@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Cooper — Indaiatuba</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --verde: #1a6b3a;
+    --verde-claro: #e8f5ee;
+    --verde-mid: #2d8a52;
+    --cinza-bg: #f5f6f8;
+    --cinza-card: #ffffff;
+    --cinza-borda: #e2e5ea;
+    --cinza-texto: #6b7280;
+    --texto: #1a1f2e;
+    --vermelho: #dc2626;
+    --amarelo: #d97706;
+    --azul: #2563eb;
+    --radius: 10px;
+    --sombra: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+    --sombra-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--cinza-bg);
+    color: var(--texto);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--verde);
+    color: white;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-logo {
+    width: 34px; height: 34px; background: rgba(255,255,255,0.2);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .header-title { font-size: 16px; font-weight: 600; }
+  .header-sub { font-size: 12px; opacity: 0.7; }
+  .btn-atualizar {
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+    color: white; padding: 7px 14px; border-radius: 7px; font-size: 13px;
+    font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px;
+    transition: background 0.15s;
+  }
+  .btn-atualizar:hover { background: rgba(255,255,255,0.25); }
+
+  /* ── MAIN ── */
+  main { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
+
+  /* ── CARDS RESUMO ── */
+  .resumo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .card-resumo {
+    background: var(--cinza-card);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    box-shadow: var(--sombra);
+    border: 1px solid var(--cinza-borda);
+  }
+  .card-resumo .label { font-size: 12px; color: var(--cinza-texto); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .card-resumo .valor { font-size: 28px; font-weight: 700; color: var(--verde); line-height: 1; }
+  .card-resumo .sub { font-size: 12px; color: var(--cinza-texto); margin-top: 4px; }
+
+  /* ── BARRA BUSCA/FILTRO ── */
+  .barra-filtros {
+    background: white;
+    border: 1px solid var(--cinza-borda);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    box-shadow: var(--sombra);
+  }
+  .busca-wrap {
+    flex: 1; min-width: 200px;
+    position: relative;
+  }
+  .busca-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--cinza-texto); pointer-events: none; }
+  #busca {
+    width: 100%; padding: 8px 12px 8px 34px;
+    border: 1px solid var(--cinza-borda); border-radius: 7px;
+    font-size: 14px; font-family: inherit; color: var(--texto);
+    background: var(--cinza-bg);
+    transition: border-color 0.15s, background 0.15s;
+  }
+  #busca:focus { outline: none; border-color: var(--verde-mid); background: white; }
+  select.filtro {
+    padding: 8px 10px; border: 1px solid var(--cinza-borda); border-radius: 7px;
+    font-size: 13px; font-family: inherit; color: var(--texto); background: var(--cinza-bg);
+    cursor: pointer; min-width: 130px;
+  }
+  select.filtro:focus { outline: none; border-color: var(--verde-mid); }
+  .btn-exportar {
+    padding: 8px 14px; background: var(--verde); color: white; border: none;
+    border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer;
+    display: flex; align-items: center; gap: 6px; transition: background 0.15s; white-space: nowrap;
+  }
+  .btn-exportar:hover { background: var(--verde-mid); }
+
+  /* ── TABELA ── */
+  .tabela-wrap {
+    background: white;
+    border: 1px solid var(--cinza-borda);
+    border-radius: var(--radius);
+    box-shadow: var(--sombra);
+    overflow: hidden;
+  }
+  .tabela-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--cinza-borda);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .tabela-titulo { font-size: 14px; font-weight: 600; }
+  .contador-resultados { font-size: 13px; color: var(--cinza-texto); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: #f8f9fb;
+    padding: 11px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--cinza-texto);
+    text-align: left;
+    border-bottom: 1px solid var(--cinza-borda);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+  thead th:hover { background: #eef0f3; }
+  thead th.sort-asc::after { content: ' ↑'; }
+  thead th.sort-desc::after { content: ' ↓'; }
+
+  tbody tr {
+    border-bottom: 1px solid #f0f2f5;
+    transition: background 0.1s;
+    cursor: pointer;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--verde-claro); }
+  td { padding: 12px 16px; font-size: 13px; color: var(--texto); vertical-align: middle; }
+  td.nome { font-weight: 500; }
+
+  .badge {
+    display: inline-block; padding: 3px 8px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+  }
+  .badge-sim { background: #dcfce7; color: #15803d; }
+  .badge-nao { background: #fef2f2; color: #dc2626; }
+  .badge-pendente { background: #fef9c3; color: #b45309; }
+
+  .btn-acao {
+    padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: 500;
+    cursor: pointer; border: 1px solid; transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px;
+  }
+  .btn-ver { background: #eff6ff; color: var(--azul); border-color: #bfdbfe; }
+  .btn-ver:hover { background: #dbeafe; }
+  .btn-pdf { background: #f0fdf4; color: var(--verde); border-color: #bbf7d0; }
+  .btn-pdf:hover { background: #dcfce7; }
+
+  .acoes-cell { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  /* ── ESTADO VAZIO/LOADING ── */
+  .estado-central {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--cinza-texto);
+  }
+  .estado-central .icone { font-size: 48px; margin-bottom: 12px; }
+  .estado-central p { font-size: 15px; }
+  .estado-central small { font-size: 13px; display: block; margin-top: 6px; opacity: 0.7; }
+  .spinner {
+    width: 36px; height: 36px; border: 3px solid var(--cinza-borda);
+    border-top-color: var(--verde); border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── MODAL DETALHES ── */
+  .overlay {
+    display: none;
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    z-index: 200; align-items: flex-start; justify-content: center;
+    padding: 24px 16px; overflow-y: auto;
+  }
+  .overlay.aberto { display: flex; }
+  .modal {
+    background: white; border-radius: 14px; max-width: 700px; width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden;
+    margin: auto;
+  }
+  .modal-header {
+    background: var(--verde); color: white;
+    padding: 18px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-header h2 { font-size: 16px; font-weight: 600; }
+  .modal-header .data-cadastro { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+  .btn-fechar {
+    background: rgba(255,255,255,0.2); border: none; color: white;
+    width: 30px; height: 30px; border-radius: 6px; cursor: pointer;
+    font-size: 16px; display: flex; align-items: center; justify-content: center;
+  }
+  .btn-fechar:hover { background: rgba(255,255,255,0.3); }
+  .modal-body { padding: 24px; }
+
+  .secao-modal { margin-bottom: 20px; }
+  .secao-modal h3 {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--cinza-texto);
+    margin-bottom: 12px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--cinza-borda);
+  }
+  .campos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .campo { }
+  .campo .campo-label { font-size: 11px; color: var(--cinza-texto); font-weight: 500; margin-bottom: 2px; }
+  .campo .campo-valor { font-size: 13px; color: var(--texto); font-weight: 500; }
+  .campo.full { grid-column: 1 / -1; }
+
+  .assinatura-img {
+    border: 1px solid var(--cinza-borda); border-radius: 8px;
+    max-width: 280px; background: white; padding: 4px;
+  }
+
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--cinza-borda);
+    display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;
+  }
+  .btn-modal {
+    padding: 9px 18px; border-radius: 8px; font-size: 13px;
+    font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px;
+    border: none; transition: all 0.15s;
+  }
+  .btn-modal-secundario { background: var(--cinza-bg); color: var(--texto); border: 1px solid var(--cinza-borda); }
+  .btn-modal-secundario:hover { background: #eaedf0; }
+  .btn-modal-primario { background: var(--verde); color: white; }
+  .btn-modal-primario:hover { background: var(--verde-mid); }
+  .btn-modal-whats { background: #25d366; color: white; }
+  .btn-modal-whats:hover { background: #1eb85a; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: #1a1f2e; color: white; padding: 12px 20px; border-radius: 8px;
+    font-size: 14px; z-index: 999; transition: transform 0.3s;
+    white-space: nowrap; pointer-events: none; box-shadow: var(--sombra-md);
+  }
+  #toast.mostrar { transform: translateX(-50%) translateY(0); }
+
+  /* ── PAGINAÇÃO ── */
+  .paginacao {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px; border-top: 1px solid var(--cinza-borda);
+    font-size: 13px; color: var(--cinza-texto);
+  }
+  .paginacao-btns { display: flex; gap: 6px; }
+  .btn-pag {
+    padding: 5px 10px; border: 1px solid var(--cinza-borda);
+    border-radius: 6px; background: white; cursor: pointer; font-size: 13px;
+    transition: all 0.15s;
+  }
+  .btn-pag:hover:not(:disabled) { background: var(--verde-claro); border-color: var(--verde-mid); }
+  .btn-pag:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-pag.ativo { background: var(--verde); color: white; border-color: var(--verde); }
+
+  @media (max-width: 700px) {
+    .resumo-grid { grid-template-columns: 1fr 1fr; }
+    table { font-size: 12px; }
+    td, thead th { padding: 10px 10px; }
+    .campos-grid { grid-template-columns: 1fr; }
+    .barra-filtros { gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="header-logo">🌿</div>
+    <div>
+      <div class="header-title">Cooper Indaiatuba</div>
+      <div class="header-sub">Painel de Cadastros</div>
+    </div>
+  </div>
+  <button class="btn-atualizar" onclick="carregarDados()">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+    Atualizar
+  </button>
+</header>
+
+<main>
+  <!-- RESUMO -->
+  <div class="resumo-grid" id="resumo">
+    <div class="card-resumo"><div class="label">Total de Cadastros</div><div class="valor" id="r-total">—</div></div>
+    <div class="card-resumo"><div class="label">Hoje</div><div class="valor" id="r-hoje">—</div></div>
+    <div class="card-resumo"><div class="label">Este Mês</div><div class="valor" id="r-mes">—</div></div>
+    <div class="card-resumo"><div class="label">Com Documento</div><div class="valor" id="r-doc">—</div></div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="barra-filtros">
+    <div class="busca-wrap">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" id="busca" placeholder="Buscar por nome, CPF ou e-mail…" oninput="aplicarFiltros()">
+    </div>
+    <select class="filtro" id="filtro-mes" onchange="aplicarFiltros()">
+      <option value="">Todos os meses</option>
+    </select>
+    <select class="filtro" id="filtro-doc" onchange="aplicarFiltros()">
+      <option value="">Todos</option>
+      <option value="sim">Com documento</option>
+      <option value="nao">Sem documento</option>
+    </select>
+    <button class="btn-exportar" onclick="exportarCSV()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Exportar CSV
+    </button>
+  </div>
+
+  <!-- TABELA -->
+  <div class="tabela-wrap">
+    <div class="tabela-header">
+      <span class="tabela-titulo">Fichas de Cadastro</span>
+      <span class="contador-resultados" id="contador"></span>
+    </div>
+    <div id="corpo-tabela">
+      <div class="estado-central">
+        <div class="spinner"></div>
+        <p>Carregando cadastros…</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL DETALHES -->
+<div class="overlay" id="overlay" onclick="fecharModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div>
+        <h2 id="modal-nome">—</h2>
+        <div class="data-cadastro" id="modal-data">—</div>
+      </div>
+      <button class="btn-fechar" onclick="fecharModalDireto()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn-modal btn-modal-secundario" onclick="fecharModalDireto()">Fechar</button>
+      <button class="btn-modal btn-modal-whats" id="btn-whats" onclick="enviarWhatsApp()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp
+      </button>
+      <button class="btn-modal btn-modal-primario" id="btn-imprimir" onclick="imprimirFicha()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Imprimir / PDF
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="toast">✓ Copiado!</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const SUPA_URL = 'https://xmbuslcqoaovafvdefis.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtYnVzbGNxb2FvdmFmdmRlZmlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2NzYyOTYsImV4cCI6MjA5NzI1MjI5Nn0.e79nxhTTOrORTJjUFS2K1QdN2l-4yM09AT86tzX8h14';
+
+let todos = [];
+let filtrados = [];
+let registroAtual = null;
+let paginaAtual = 1;
+const POR_PAGINA = 20;
+let sortCol = 'created_at';
+let sortDir = 'desc';
+
+async function carregarDados() {
+  document.getElementById('corpo-tabela').innerHTML = `
+    <div class="estado-central"><div class="spinner"></div><p>Carregando cadastros…</p></div>`;
+  try {
+    const res = await fetch(`${SUPA_URL}/rest/v1/cadastros?select=*&order=created_at.desc&limit=1000`, {
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': `Bearer ${SUPA_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(err);
+    }
+    todos = await res.json();
+    atualizarResumo();
+    popularFiltroMes();
+    aplicarFiltros();
+  } catch(e) {
+    document.getElementById('corpo-tabela').innerHTML = `
+      <div class="estado-central">
+        <div class="icone">⚠️</div>
+        <p>Não foi possível conectar ao banco de dados.</p>
+        <small>${e.message}</small>
+        <br><button onclick="carregarDados()" style="margin-top:16px;padding:8px 16px;background:var(--verde);color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px;">Tentar novamente</button>
+      </div>`;
+  }
+}
+
+function atualizarResumo() {
+  const hoje = new Date().toISOString().slice(0,10);
+  const mes = new Date().toISOString().slice(0,7);
+  document.getElementById('r-total').textContent = todos.length;
+  document.getElementById('r-hoje').textContent = todos.filter(r => (r.created_at||'').startsWith(hoje)).length;
+  document.getElementById('r-mes').textContent = todos.filter(r => (r.created_at||'').startsWith(mes)).length;
+  document.getElementById('r-doc').textContent = todos.filter(r => r.doc_foto || r.doc_residencia || r.tem_documento).length;
+}
+
+function popularFiltroMes() {
+  const meses = [...new Set(todos.map(r => (r.created_at||'').slice(0,7)).filter(Boolean))].sort().reverse();
+  const sel = document.getElementById('filtro-mes');
+  sel.innerHTML = '<option value="">Todos os meses</option>';
+  meses.forEach(m => {
+    const [ano, mes] = m.split('-');
+    const nomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    sel.innerHTML += `<option value="${m}">${nomes[parseInt(mes)-1]}/${ano}</option>`;
+  });
+}
+
+function aplicarFiltros() {
+  const busca = document.getElementById('busca').value.toLowerCase().trim();
+  const mes = document.getElementById('filtro-mes').value;
+  const doc = document.getElementById('filtro-doc').value;
+
+  filtrados = todos.filter(r => {
+    const nome = (r.nome||'').toLowerCase();
+    const cpf = (r.cpf||'').replace(/\D/g,'');
+    const email = (r.email||'').toLowerCase();
+    if (busca && !nome.includes(busca) && !cpf.includes(busca) && !email.includes(busca)) return false;
+    if (mes && !(r.created_at||'').startsWith(mes)) return false;
+    if (doc === 'sim' && !(r.doc_foto || r.doc_residencia || r.tem_documento)) return false;
+    if (doc === 'nao' && (r.doc_foto || r.doc_residencia || r.tem_documento)) return false;
+    return true;
+  });
+
+  // ordenação
+  filtrados.sort((a, b) => {
+    let va = a[sortCol] || '', vb = b[sortCol] || '';
+    if (sortDir === 'asc') return va > vb ? 1 : -1;
+    return va < vb ? 1 : -1;
+  });
+
+  paginaAtual = 1;
+  renderizarTabela();
+}
+
+function renderizarTabela() {
+  const total = filtrados.length;
+  document.getElementById('contador').textContent = `${total} registro${total !== 1 ? 's' : ''}`;
+
+  if (total === 0) {
+    document.getElementById('corpo-tabela').innerHTML = `
+      <div class="estado-central">
+        <div class="icone">📋</div>
+        <p>Nenhum cadastro encontrado.</p>
+        <small>Tente ajustar os filtros de busca.</small>
+      </div>`;
+    return;
+  }
+
+  const inicio = (paginaAtual - 1) * POR_PAGINA;
+  const pagina = filtrados.slice(inicio, inicio + POR_PAGINA);
+  const totalPags = Math.ceil(total / POR_PAGINA);
+
+  const cols = [
+    { key: 'created_at', label: 'Data' },
+    { key: 'nome', label: 'Nome' },
+    { key: 'cpf', label: 'CPF' },
+    { key: 'celular', label: 'Celular' },
+    { key: 'email', label: 'E-mail' },
+    { key: '_doc', label: 'Documento' },
+    { key: '_acoes', label: 'Ações' },
+  ];
+
+  let th = cols.map(c => {
+    if (c.key.startsWith('_')) return `<th>${c.label}</th>`;
+    let cls = sortCol === c.key ? (sortDir === 'asc' ? 'sort-asc' : 'sort-desc') : '';
+    return `<th class="${cls}" onclick="ordenar('${c.key}')">${c.label}</th>`;
+  }).join('');
+
+  let linhas = pagina.map(r => {
+    const data = r.created_at ? new Date(r.created_at).toLocaleDateString('pt-BR') : '—';
+    const temDoc = r.doc_foto || r.doc_residencia || r.tem_documento;
+    const badge = temDoc
+      ? '<span class="badge badge-sim">✓ Sim</span>'
+      : '<span class="badge badge-nao">— Não</span>';
+    return `<tr onclick="abrirModal('${r.id}')">
+      <td>${data}</td>
+      <td class="nome">${r.nome || '—'}</td>
+      <td>${r.cpf || '—'}</td>
+      <td>${r.celular || r.telefone || '—'}</td>
+      <td>${r.email || '—'}</td>
+      <td>${badge}</td>
+      <td onclick="event.stopPropagation()">
+        <div class="acoes-cell">
+          <button class="btn-acao btn-ver" onclick="abrirModal('${r.id}')">👁 Ver</button>
+          <button class="btn-acao btn-pdf" onclick="gerarPDF('${r.id}')">⬇ PDF</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Paginação
+  let pags = '';
+  for (let i = 1; i <= totalPags; i++) {
+    if (totalPags <= 7 || i === 1 || i === totalPags || Math.abs(i - paginaAtual) <= 1) {
+      pags += `<button class="btn-pag${i === paginaAtual ? ' ativo' : ''}" onclick="irPagina(${i})">${i}</button>`;
+    } else if (Math.abs(i - paginaAtual) === 2) {
+      pags += `<span style="padding:0 4px;color:var(--cinza-texto)">…</span>`;
+    }
+  }
+
+  document.getElementById('corpo-tabela').innerHTML = `
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr>${th}</tr></thead>
+      <tbody>${linhas}</tbody>
+    </table>
+    </div>
+    ${totalPags > 1 ? `
+    <div class="paginacao">
+      <span>Página ${paginaAtual} de ${totalPags}</span>
+      <div class="paginacao-btns">
+        <button class="btn-pag" onclick="irPagina(${paginaAtual-1})" ${paginaAtual===1?'disabled':''}>‹ Anterior</button>
+        ${pags}
+        <button class="btn-pag" onclick="irPagina(${paginaAtual+1})" ${paginaAtual===totalPags?'disabled':''}>Próximo ›</button>
+      </div>
+    </div>` : ''}`;
+}
+
+function irPagina(p) {
+  const totalPags = Math.ceil(filtrados.length / POR_PAGINA);
+  if (p < 1 || p > totalPags) return;
+  paginaAtual = p;
+  renderizarTabela();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function ordenar(col) {
+  if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  else { sortCol = col; sortDir = 'asc'; }
+  aplicarFiltros();
+}
+
+// ── MODAL ──
+function abrirModal(id) {
+  const r = todos.find(x => String(x.id) === String(id));
+  if (!r) return;
+  registroAtual = r;
+
+  document.getElementById('modal-nome').textContent = r.nome || '—';
+  const data = r.created_at ? new Date(r.created_at).toLocaleString('pt-BR') : '—';
+  document.getElementById('modal-data').textContent = `Cadastrado em ${data}`;
+
+  const temDoc = r.doc_foto || r.doc_residencia || r.tem_documento;
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="secao-modal">
+      <h3>Dados Pessoais</h3>
+      <div class="campos-grid">
+        ${campo('Nome Completo', r.nome, 'full')}
+        ${campo('CPF', r.cpf)}
+        ${campo('Data de Nascimento', r.data_nascimento || r.nascimento)}
+        ${campo('RG', r.rg)}
+        ${campo('Estado Civil', r.estado_civil)}
+        ${campo('Profissão', r.profissao)}
+      </div>
+    </div>
+    <div class="secao-modal">
+      <h3>Contato</h3>
+      <div class="campos-grid">
+        ${campo('Celular', r.celular || r.telefone)}
+        ${campo('E-mail', r.email)}
+        ${campo('Endereço', r.endereco, 'full')}
+        ${campo('Bairro', r.bairro)}
+        ${campo('Cidade', r.cidade)}
+        ${campo('CEP', r.cep)}
+      </div>
+    </div>
+    ${r.conjuge_nome || r.nome_conjuge ? `
+    <div class="secao-modal">
+      <h3>Cônjuge</h3>
+      <div class="campos-grid">
+        ${campo('Nome', r.conjuge_nome || r.nome_conjuge, 'full')}
+        ${campo('CPF', r.conjuge_cpf || r.cpf_conjuge)}
+        ${campo('Celular', r.conjuge_celular || r.cel_conjuge)}
+      </div>
+    </div>` : ''}
+    <div class="secao-modal">
+      <h3>Documentos & Assinatura</h3>
+      <div class="campos-grid">
+        <div class="campo">
+          <div class="campo-label">Documento com foto</div>
+          <div class="campo-valor">${r.doc_foto ? '<span class="badge badge-sim">✓ Enviado</span>' : '<span class="badge badge-nao">— Não enviado</span>'}</div>
+        </div>
+        <div class="campo">
+          <div class="campo-label">Comprovante de residência</div>
+          <div class="campo-valor">${r.doc_residencia ? '<span class="badge badge-sim">✓ Enviado</span>' : '<span class="badge badge-nao">— Não enviado</span>'}</div>
+        </div>
+        ${r.assinatura ? `
+        <div class="campo full">
+          <div class="campo-label">Assinatura</div>
+          <div style="margin-top:6px"><img src="${r.assinatura}" class="assinatura-img" alt="Assinatura"></div>
+          <div style="font-size:11px;color:var(--cinza-texto);margin-top:4px">${r.nome || ''} — CPF: ${r.cpf || ''}</div>
+        </div>` : ''}
+      </div>
+    </div>
+    ${r.local_assinatura || r.data_assinatura ? `
+    <div class="secao-modal">
+      <h3>Declaração</h3>
+      <div class="campos-grid">
+        ${campo('Local', r.local_assinatura || r.local)}
+        ${campo('Data da Assinatura', r.data_assinatura)}
+      </div>
+    </div>` : ''}
+  `;
+
+  document.getElementById('overlay').classList.add('aberto');
+}
+
+function campo(label, valor, extra) {
+  const v = valor || '—';
+  return `<div class="campo${extra ? ' '+extra : ''}">
+    <div class="campo-label">${label}</div>
+    <div class="campo-valor">${v}</div>
+  </div>`;
+}
+
+function fecharModal(e) {
+  if (e.target === document.getElementById('overlay')) fecharModalDireto();
+}
+function fecharModalDireto() {
+  document.getElementById('overlay').classList.remove('aberto');
+  registroAtual = null;
+}
+
+// ── WHATSAPP ──
+function enviarWhatsApp() {
+  if (!registroAtual) return;
+  const r = registroAtual;
+  const txt = `*Cadastro Cooper Indaiatuba*\n\n*Nome:* ${r.nome||'—'}\n*CPF:* ${r.cpf||'—'}\n*Celular:* ${r.celular||r.telefone||'—'}\n*E-mail:* ${r.email||'—'}\n*Endereço:* ${r.endereco||'—'}, ${r.bairro||''} — ${r.cidade||''}\n*Cadastrado em:* ${r.created_at ? new Date(r.created_at).toLocaleString('pt-BR') : '—'}`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(txt), '_blank');
+}
+
+// ── PDF / IMPRIMIR ──
+function gerarPDF(id) {
+  const r = todos.find(x => String(x.id) === String(id));
+  if (!r) return;
+  registroAtual = r;
+  imprimirFicha();
+}
+
+function imprimirFicha() {
+  if (!registroAtual) return;
+  const r = registroAtual;
+
+  const win = window.open('', '_blank');
+  const data = r.created_at ? new Date(r.created_at).toLocaleString('pt-BR') : '—';
+  win.document.write(`<!DOCTYPE html><html><head>
+  <meta charset="UTF-8">
+  <title>Ficha — ${r.nome||'Cadastro'}</title>
+  <style>
+    body{font-family:Arial,sans-serif;max-width:720px;margin:0 auto;padding:24px;color:#1a1f2e;font-size:13px}
+    h1{color:#1a6b3a;font-size:20px;margin-bottom:4px}
+    .sub{color:#6b7280;font-size:12px;margin-bottom:20px}
+    h2{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;border-bottom:1px solid #e2e5ea;padding-bottom:5px;margin:18px 0 10px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .field .label{font-size:11px;color:#6b7280}
+    .field .val{font-size:13px;font-weight:600;margin-top:1px}
+    .full{grid-column:1/-1}
+    img.sig{max-width:200px;border:1px solid #e2e5ea;border-radius:4px;padding:2px}
+    @media print{body{padding:12px}}
+  </style>
+  </head><body>
+  <h1>Cooper Indaiatuba — Ficha de Cadastro</h1>
+  <div class="sub">Cadastrado em: ${data} &nbsp;|&nbsp; ID: ${r.id||'—'}</div>
+  <h2>Dados Pessoais</h2>
+  <div class="grid">
+    <div class="field full"><div class="label">Nome Completo</div><div class="val">${r.nome||'—'}</div></div>
+    <div class="field"><div class="label">CPF</div><div class="val">${r.cpf||'—'}</div></div>
+    <div class="field"><div class="label">RG</div><div class="val">${r.rg||'—'}</div></div>
+    <div class="field"><div class="label">Data de Nascimento</div><div class="val">${r.data_nascimento||r.nascimento||'—'}</div></div>
+    <div class="field"><div class="label">Estado Civil</div><div class="val">${r.estado_civil||'—'}</div></div>
+    <div class="field"><div class="label">Profissão</div><div class="val">${r.profissao||'—'}</div></div>
+  </div>
+  <h2>Contato</h2>
+  <div class="grid">
+    <div class="field"><div class="label">Celular</div><div class="val">${r.celular||r.telefone||'—'}</div></div>
+    <div class="field"><div class="label">E-mail</div><div class="val">${r.email||'—'}</div></div>
+    <div class="field full"><div class="label">Endereço</div><div class="val">${r.endereco||'—'}</div></div>
+    <div class="field"><div class="label">Bairro</div><div class="val">${r.bairro||'—'}</div></div>
+    <div class="field"><div class="label">Cidade</div><div class="val">${r.cidade||'—'}</div></div>
+    <div class="field"><div class="label">CEP</div><div class="val">${r.cep||'—'}</div></div>
+  </div>
+  ${r.conjuge_nome||r.nome_conjuge ? `<h2>Cônjuge</h2>
+  <div class="grid">
+    <div class="field full"><div class="label">Nome</div><div class="val">${r.conjuge_nome||r.nome_conjuge||'—'}</div></div>
+    <div class="field"><div class="label">CPF</div><div class="val">${r.conjuge_cpf||r.cpf_conjuge||'—'}</div></div>
+    <div class="field"><div class="label">Celular</div><div class="val">${r.conjuge_celular||r.cel_conjuge||'—'}</div></div>
+  </div>` : ''}
+  <h2>Assinatura</h2>
+  ${r.assinatura ? `<img src="${r.assinatura}" class="sig"><br>` : '<p>Sem assinatura registrada.</p>'}
+  <p style="font-size:11px;color:#6b7280;margin-top:4px">${r.nome||''} — CPF: ${r.cpf||''}</p>
+  ${r.local_assinatura||r.local ? `<p style="font-size:12px;margin-top:6px">Local: ${r.local_assinatura||r.local||'—'} &nbsp;|&nbsp; Data: ${r.data_assinatura||'—'}</p>` : ''}
+  <script>window.onload=function(){window.print();}<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+// ── EXPORTAR CSV ──
+function exportarCSV() {
+  if (!filtrados.length) { mostrarToast('Nenhum dado para exportar'); return; }
+  const campos = ['created_at','nome','cpf','rg','data_nascimento','estado_civil','profissao','celular','email','endereco','bairro','cidade','cep'];
+  const cabec = ['Data Cadastro','Nome','CPF','RG','Nascimento','Estado Civil','Profissão','Celular','E-mail','Endereço','Bairro','Cidade','CEP'];
+  let csv = cabec.join(';') + '\n';
+  filtrados.forEach(r => {
+    csv += campos.map(c => {
+      let v = r[c] || '';
+      if (typeof v === 'string' && (v.includes(';') || v.includes('"') || v.includes('\n')))
+        v = '"' + v.replace(/"/g, '""') + '"';
+      return v;
+    }).join(';') + '\n';
+  });
+  const blob = new Blob(['\uFEFF' + csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `cadastros_cooper_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  mostrarToast('CSV exportado com sucesso!');
+}
+
+function mostrarToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('mostrar');
+  setTimeout(() => t.classList.remove('mostrar'), 2800);
+}
+
+// iniciar
+carregarDados();
+</script>
+</body>
+</html>

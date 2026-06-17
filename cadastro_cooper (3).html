@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Cadastro — Cooper Indaiatuba</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--verde:#1a6b3a;--verde-mid:#2d8a52;--verde-claro:#e8f5ee;--cinza:#f5f6f8;--borda:#e2e5ea;--texto:#1a1f2e;--cinza-t:#6b7280}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--cinza);color:var(--texto);min-height:100vh}
+header{background:var(--verde);color:white;padding:14px 20px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+header .logo{width:32px;height:32px;background:rgba(255,255,255,.2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+header h1{font-size:15px;font-weight:600}
+header p{font-size:11px;opacity:.7}
+.progresso{background:rgba(255,255,255,.2);height:3px}
+.progresso-bar{height:3px;background:white;transition:width .3s;width:0}
+.wrap{max-width:600px;margin:0 auto;padding:20px 16px 40px}
+.etapa{display:none}.etapa.ativa{display:block}
+.card{background:white;border-radius:10px;border:1px solid var(--borda);padding:20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.card h2{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--cinza-t);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--borda)}
+.grid{display:grid;gap:12px}.g2{grid-template-columns:1fr 1fr}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:12px;font-weight:500;color:var(--cinza-t)}
+.field input,.field select{height:42px;padding:0 12px;border:1px solid var(--borda);border-radius:8px;font-size:14px;font-family:inherit;color:var(--texto);background:white;transition:border-color .15s}
+.field input:focus,.field select:focus{outline:none;border-color:var(--verde-mid);box-shadow:0 0 0 3px rgba(45,138,82,.1)}
+.field input.erro{border-color:#dc2626!important}
+.field .msg-erro{font-size:11px;color:#dc2626;margin-top:2px}
+.full{grid-column:1/-1}
+.nav{display:flex;gap:10px;margin-top:20px}
+.btn{flex:1;padding:13px;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-p{background:var(--verde);color:white}.btn-p:hover{background:var(--verde-mid)}
+.btn-s{background:white;color:var(--texto);border:1px solid var(--borda)}.btn-s:hover{background:var(--cinza)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.cep-wrap{position:relative}
+.cep-loading{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--cinza-t)}
+#canvas-sig{border:2px dashed var(--borda);border-radius:8px;width:100%;touch-action:none;cursor:crosshair;background:white;display:block}
+.sig-row{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.sig-info{font-size:12px;color:var(--cinza-t)}
+.btn-lp{font-size:12px;color:var(--verde);background:none;border:none;cursor:pointer;text-decoration:underline}
+.upload-area{border:2px dashed var(--borda);border-radius:8px;padding:18px;text-align:center;cursor:pointer;transition:all .15s;background:var(--cinza)}
+.upload-area:hover{border-color:var(--verde-mid);background:var(--verde-claro)}
+.upload-area p{font-size:13px;color:var(--cinza-t)}
+.upload-area small{font-size:11px;color:var(--cinza-t);display:block;margin-top:4px}
+.ok-arq{font-size:12px;color:var(--verde);margin-top:6px;font-weight:500}
+.preview-img{max-width:100%;max-height:120px;border-radius:6px;margin-top:6px;border:1px solid var(--borda)}
+/* Termos */
+.termo-scroll{background:var(--cinza);border:1px solid var(--borda);border-radius:8px;padding:14px;font-size:12px;color:#444;line-height:1.7;height:160px;overflow-y:scroll;margin-bottom:10px}
+.termo-aviso{font-size:11px;color:var(--cinza-t);text-align:center;margin-bottom:8px}
+.chk-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.chk-row input{width:18px;height:18px;margin-top:1px;accent-color:var(--verde);flex-shrink:0}
+.chk-row input:disabled{opacity:.4;cursor:not-allowed}
+.chk-row span{font-size:13px;line-height:1.4}
+.dots{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:18px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--borda);transition:all .2s}
+.dot.a{background:var(--verde);width:22px;border-radius:4px}
+.dot.f{background:var(--verde-mid)}
+.sucesso{text-align:center;padding:36px 16px}
+.sucesso .ic{font-size:56px;margin-bottom:14px}
+.sucesso h2{font-size:20px;font-weight:700;color:var(--verde);margin-bottom:8px}
+.sucesso p{font-size:14px;color:var(--cinza-t);margin-bottom:22px}
+.btn-fin{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;background:var(--verde);color:white;border:none;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-bottom:10px}
+.btn-fin.wa{background:#25d366}
+@media(max-width:480px){.g2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">C</div>
+  <div><h1>Cooper Indaiatuba</h1><p>Ficha de Associação</p></div>
+</header>
+<div class="progresso"><div class="progresso-bar" id="pbar"></div></div>
+<div class="wrap">
+  <div class="dots" id="dots"></div>
+
+  <!-- E1 DADOS PESSOAIS -->
+  <div class="etapa ativa" id="e1">
+    <div class="card">
+      <h2>Dados Pessoais</h2>
+      <div class="grid">
+        <div class="field full"><label>Nome Completo *</label><input id="nome" type="text" placeholder="Nome completo"></div>
+        <div class="field"><label>CPF *</label><input id="cpf" type="text" placeholder="000.000.000-00" maxlength="14" oninput="mCPF(this)"></div>
+        <div class="field"><label>RG *</label><input id="rg" type="text" placeholder="Número do RG"></div>
+        <div class="field"><label>Órgão Emissor</label><input id="orgao" type="text" placeholder="SSP/SP"></div>
+        <div class="field">
+          <label>Data de Nascimento *</label>
+          <input id="nascimento" type="date">
+          <div class="msg-erro" id="erro-nasc"></div>
+        </div>
+        <div class="field"><label>Estado Civil</label>
+          <select id="estado_civil"><option value="">Selecione</option><option>Solteiro(a)</option><option>Casado(a)</option><option>Divorciado(a)</option><option>Viúvo(a)</option><option>União estável</option></select>
+        </div>
+        <div class="field"><label>Sexo</label>
+          <select id="sexo"><option value="">Selecione</option><option>Masculino</option><option>Feminino</option><option>Outro</option></select>
+        </div>
+        <div class="field full"><label>Profissão</label><input id="profissao" type="text" placeholder="Sua profissão"></div>
+        <div class="field full"><label>Nacionalidade</label><input id="nacionalidade" type="text" value="Brasileiro(a)"></div>
+      </div>
+    </div>
+    <div class="nav"><button class="btn btn-p" onclick="av(1)">Próximo →</button></div>
+  </div>
+
+  <!-- E2 CONTATO E ENDEREÇO -->
+  <div class="etapa" id="e2">
+    <div class="card">
+      <h2>Contato</h2>
+      <div class="grid g2">
+        <div class="field"><label>Celular *</label><input id="celular" type="tel" placeholder="(00) 00000-0000" maxlength="15" oninput="mTel(this)"></div>
+        <div class="field"><label>Telefone</label><input id="telefone" type="tel" placeholder="(00) 0000-0000" maxlength="14" oninput="mTelF(this)"></div>
+        <div class="field full"><label>E-mail</label><input id="email" type="email" placeholder="seu@email.com"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Endereço Residencial</h2>
+      <div class="grid">
+        <div class="field g2">
+          <label>CEP *</label>
+          <div class="cep-wrap">
+            <input id="cep" type="text" placeholder="00000-000" maxlength="9" oninput="mCEP(this)" onblur="buscarCEP()">
+            <span class="cep-loading" id="cep-loading"></span>
+          </div>
+        </div>
+        <div class="field full"><label>Endereço *</label><input id="endereco" type="text" placeholder="Rua, número, complemento"></div>
+        <div class="field"><label>Bairro</label><input id="bairro" type="text" placeholder="Bairro"></div>
+        <div class="field"><label>Cidade</label><input id="cidade" type="text" placeholder="Cidade"></div>
+        <div class="field"><label>Estado</label><input id="estado" type="text" placeholder="SP" maxlength="2"></div>
+      </div>
+    </div>
+    <div class="nav"><button class="btn btn-s" onclick="vt()">← Voltar</button><button class="btn btn-p" onclick="av(2)">Próximo →</button></div>
+  </div>
+
+  <!-- E3 BANCO -->
+  <div class="etapa" id="e3">
+    <div class="card">
+      <h2>Dados Bancários</h2>
+      <div class="grid g2">
+        <div class="field full"><label>Favorecido</label><input id="favorecido" type="text" placeholder="Nome do favorecido"></div>
+        <div class="field"><label>Banco</label><input id="banco" type="text" placeholder="Nome do banco"></div>
+        <div class="field"><label>Tipo de Conta</label><select id="tipo_conta"><option value="">Selecione</option><option>Corrente</option><option>Poupança</option></select></div>
+        <div class="field"><label>Agência</label><input id="agencia" type="text" placeholder="0000"></div>
+        <div class="field"><label>Conta</label><input id="conta" type="text" placeholder="00000-0"></div>
+        <div class="field full"><label>PIX</label><input id="pix" type="text" placeholder="CPF, e-mail, celular ou chave"></div>
+      </div>
+    </div>
+    <div class="nav"><button class="btn btn-s" onclick="vt()">← Voltar</button><button class="btn btn-p" onclick="av(3)">Próximo →</button></div>
+  </div>
+
+  <!-- E4 DOCUMENTOS -->
+  <div class="etapa" id="e4">
+    <div class="card">
+      <h2>Documentos (opcional)</h2>
+      <p style="font-size:13px;color:var(--cinza-t);margin-bottom:14px">Os documentos serão incluídos no comprovante PDF.</p>
+      <div class="grid">
+        <div class="field full">
+          <label>Documento com foto (RG, CNH…)</label>
+          <div class="upload-area" onclick="document.getElementById('inp-doc').click()"><p>📄 Toque para anexar</p><small>JPG ou PNG</small></div>
+          <input type="file" id="inp-doc" accept="image/*" style="display:none" onchange="carregarArq(this,'doc')">
+          <div class="ok-arq" id="ok-doc"></div>
+          <img id="prev-doc" class="preview-img" style="display:none">
+        </div>
+        <div class="field full">
+          <label>Comprovante de residência</label>
+          <div class="upload-area" onclick="document.getElementById('inp-res').click()"><p>🏠 Toque para anexar</p><small>JPG ou PNG</small></div>
+          <input type="file" id="inp-res" accept="image/*" style="display:none" onchange="carregarArq(this,'res')">
+          <div class="ok-arq" id="ok-res"></div>
+          <img id="prev-res" class="preview-img" style="display:none">
+        </div>
+      </div>
+    </div>
+    <div class="nav"><button class="btn btn-s" onclick="vt()">← Voltar</button><button class="btn btn-p" onclick="av(4)">Próximo →</button></div>
+  </div>
+
+  <!-- E5 TERMOS -->
+  <div class="etapa" id="e5">
+    <div class="card">
+      <h2>Termos de Associação</h2>
+      <p style="font-size:12px;color:var(--cinza-t);margin-bottom:10px">Role até o final para aceitar os termos.</p>
+
+      <p style="font-size:12px;font-weight:600;margin-bottom:4px">1. Termo de Atualização Cadastral</p>
+      <div class="termo-scroll" id="scroll1" onscroll="chkScroll(1)">
+        ILMO. SR. DIRETOR PRESIDENTE DA COOPER – COOPERATIVA DE TRABALHO RECICLAVEIS DE INDAIATUBA<br><br>
+        Eu, [ASSOCIADO PESSOA FÍSICA], cuja qualificação consta do Anexo I que acompanha o presente documento, na qualidade de associado(a) da COOPER - COOPERATIVA DE TRABALHO RECICLAVEIS DE INDAIATUBA, inscrita no CNPJ/ME sob o n. 58.716.071/0001-75, com sede na Diamante Negro, n. 90, galpão 02, Recreio Campestre Jóia, CEP 13347-140, município de Indaiatuba, Estado de São Paulo ("Cooperativa"), venho solicitar e autorizar a atualização dos meus dados cadastrais junto ao banco de dados da Cooperativa, conforme formulário anexo devidamente preenchido, que é a parte integrante deste instrumento ("Termo de Atualização Cadastral").<br><br>
+        Termos em que pede deferimento.<br><br>
+        Indaiatuba, data conforme assinatura.<br><br>
+        ASSOCIADO PESSOA FÍSICA
+      </div>
+      <div class="termo-aviso" id="aviso1">⬇ Role até o final para liberar</div>
+      <div class="chk-row"><input type="checkbox" id="chk1" disabled><span>Li e aceito o Termo de Atualização Cadastral.</span></div>
+
+      <p style="font-size:12px;font-weight:600;margin:12px 0 4px">2. Termo de Consentimento (LGPD)</p>
+      <div class="termo-scroll" id="scroll2" onscroll="chkScroll(2)">
+        Eu, [ASSOCIADO PESSOA FÍSICA], cuja qualificação consta do Anexo I do Termo de Associação ou Termo de Atualização Cadastral, declaro estar ciente e de acordo em disponibilizar e/ou autorizar o acesso a determinados dados pessoais para fins de efetivação do ingresso como associado(a) junto a COOPER - COOPERATIVA DE TRABALHO RECICLAVEIS DE INDAIATUBA, inscrita no CNPJ/ME sob o n. 58.716.071/0001-75, com sede na Diamante Negro, n. 90, galpão 02, Recreio Campestre Jóia, CEP 13347-140, município de Indaiatuba, Estado de São Paulo ("Cooperativa"), para que sejam utilizados com a finalidade exclusiva de atender ao processo de ingresso, bem como ao disposto no Estatuto Social da Cooperativa.<br><br>
+        Declaro, ainda, estar ciente de que, a qualquer momento, posso ter acesso às informações sobre os meus dados, revogar este consentimento, optar pela atualização, correção ou eliminação de dados desnecessários ou excessivos, nos termos da Lei nº 13.709 – Lei Geral de Proteção de Dados Pessoais (LGPD).<br><br>
+        Os dados coletados serão armazenados e preservados por um período indeterminado e as solicitações e questionamentos acerca dos dados fornecidos, bem como a eliminação de dados desnecessários ou excessivos deverão ser realizadas através do e-mail cooperativa.reciclaveis@hotmail.com<br><br>
+        Este documento visa registrar a manifestação livre, informada e inequívoca pela qual o(a) titular dos dados concorda em fornecer seus dados pessoais para finalidade específica, em conformidade com a LGPD.
+      </div>
+      <div class="termo-aviso" id="aviso2">⬇ Role até o final para liberar</div>
+      <div class="chk-row"><input type="checkbox" id="chk2" disabled><span>Li e aceito o Termo de Consentimento (LGPD).</span></div>
+
+      <p style="font-size:12px;font-weight:600;margin:12px 0 4px">3. Termo de Associação</p>
+      <div class="termo-scroll" id="scroll3" onscroll="chkScroll(3)">
+        ILMO. SR. DIRETOR PRESIDENTE DA COOPER - COOPERATIVA DE TRABALHO RECICLAVEIS DE INDAIATUBA<br><br>
+        Eu, [ASSOCIADO PESSOA FÍSICA], cuja qualificação consta do Anexo I que acompanha o presente documento, solicito minha associação junto a COOPER – COOPERATIVA DE TRABALHO RECICLAVEIS DE INDAIATUBA, inscrita no CNPJ/ME sob o n. 58.716.071/0001-75, com sede na Diamante Negro, n. 90, galpão 02, Recreio Campestre Jóia, CEP 13347-140, município de Indaiatuba, Estado de São Paulo ("Cooperativa"), declarando no presente Termo de Associação que:<br><br>
+        - atuo no ramo de coleta, separação, intermediação, compra e venda de sucata de metais ferrosos e não ferrosos, bem como outros resíduos de metais e concordo com as disposições do Estatuto Social da Cooperativa; e,<br><br>
+        - comprometo-me a respeitar e seguir todas as orientações e disposições do Estatuto Social da Cooperativa.<br><br>
+        Termos em que pede deferimento.
+      </div>
+      <div class="termo-aviso" id="aviso3">⬇ Role até o final para liberar</div>
+      <div class="chk-row"><input type="checkbox" id="chk3" disabled><span>Li e aceito o Termo de Associação.</span></div>
+    </div>
+    <div class="nav"><button class="btn btn-s" onclick="vt()">← Voltar</button><button class="btn btn-p" onclick="av(5)">Próximo →</button></div>
+  </div>
+
+  <!-- E6 ASSINATURA -->
+  <div class="etapa" id="e6">
+    <div class="card">
+      <h2>Assinatura</h2>
+      <canvas id="canvas-sig" height="160"></canvas>
+      <div class="sig-row">
+        <div class="sig-info" id="sig-st">Assine com o dedo ou mouse acima</div>
+        <button class="btn-lp" onclick="limSig()">Limpar</button>
+      </div>
+      <div class="field" style="margin-top:12px"><label>Local *</label><input id="local" type="text" value="Indaiatuba - SP"></div>
+    </div>
+    <div class="nav"><button class="btn btn-s" onclick="vt()">← Voltar</button><button class="btn btn-p" id="btn-fin" onclick="finalizar()">Finalizar ✓</button></div>
+  </div>
+
+  <!-- E7 SUCESSO -->
+  <div class="etapa" id="e7">
+    <div class="card sucesso">
+      <div class="ic">✅</div>
+      <h2>Cadastro realizado!</h2>
+      <p>Seus dados foram enviados com sucesso para a Cooper Indaiatuba.</p>
+      <button class="btn-fin" onclick="baixarPDF()">⬇ Baixar comprovante em PDF</button>
+      <button class="btn-fin wa" onclick="enviarWA()">💬 Enviar pelo WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var SURL='https://xmbuslcqoaovafvdefis.supabase.co';
+var SKEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhtYnVzbGNxb2FvdmFmdmRlZmlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2NzYyOTYsImV4cCI6MjA5NzI1MjI5Nn0.e79nxhTTOrORTJjUFS2K1QdN2l-4yM09AT86tzX8h14';
+var cur=1,tot=6,hasSig=false,sigData='',aDoc={name:'',data:''},aRes={name:'',data:''};
+function g(id){var e=document.getElementById(id);return e?e.value.trim():'';}
+function ui(){
+  for(var i=1;i<=7;i++){var e=document.getElementById('e'+i);if(e)e.className='etapa'+(i===cur?' ativa':'');}
+  document.getElementById('pbar').style.width=Math.min((cur-1)/tot*100,100)+'%';
+  var h='';for(var j=1;j<=tot;j++){var c=j===cur?'a':j<cur?'f':'';h+='<div class="dot '+c+'"></div>';}
+  document.getElementById('dots').innerHTML=h;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function av(de){
+  if(de===1){
+    if(!g('nome')){alert('Informe o nome completo.');return;}
+    if(!valCPF(g('cpf'))){alert('CPF inválido.');return;}
+    if(!g('rg')){alert('Informe o RG.');return;}
+    if(!g('nascimento')){alert('Informe a data de nascimento.');return;}
+    var nasc=new Date(g('nascimento'));
+    var hoje=new Date();
+    var idade=hoje.getFullYear()-nasc.getFullYear();
+    var m=hoje.getMonth()-nasc.getMonth();
+    if(m<0||(m===0&&hoje.getDate()<nasc.getDate()))idade--;
+    if(idade<18){
+      document.getElementById('erro-nasc').textContent='O associado deve ter pelo menos 18 anos.';
+      document.getElementById('nascimento').classList.add('erro');
+      return;
+    }
+    document.getElementById('erro-nasc').textContent='';
+    document.getElementById('nascimento').classList.remove('erro');
+  }
+  if(de===2){if(!g('celular')){alert('Informe o celular.');return;}if(!g('cep')||!g('endereco')){alert('Informe o CEP e o endereço.');return;}}
+  if(de===5){
+    if(!document.getElementById('chk1').checked||!document.getElementById('chk2').checked||!document.getElementById('chk3').checked){
+      alert('Leia e aceite todos os termos para continuar.');return;
+    }
+  }
+  cur++;ui();
+}
+function vt(){cur--;ui();}
+
+// Máscaras
+function mCPF(el){var v=el.value.replace(/\D/g,'').slice(0,11);v=v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');el.value=v;}
+function mTel(el){var v=el.value.replace(/\D/g,'').slice(0,11);v=v.replace(/^(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d)/,'$1-$2');el.value=v;}
+function mTelF(el){var v=el.value.replace(/\D/g,'').slice(0,10);v=v.replace(/^(\d{2})(\d)/,'($1) $2').replace(/(\d{4})(\d)/,'$1-$2');el.value=v;}
+function mCEP(el){var v=el.value.replace(/\D/g,'').slice(0,8);v=v.replace(/(\d{5})(\d)/,'$1-$2');el.value=v;}
+
+// Busca CEP
+function buscarCEP(){
+  var cep=g('cep').replace(/\D/g,'');
+  if(cep.length!==8)return;
+  document.getElementById('cep-loading').textContent='🔄';
+  fetch('https://viacep.com.br/ws/'+cep+'/json/')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      document.getElementById('cep-loading').textContent='';
+      if(d.erro){alert('CEP não encontrado.');return;}
+      document.getElementById('endereco').value=(d.logradouro||'');
+      document.getElementById('bairro').value=(d.bairro||'');
+      document.getElementById('cidade').value=(d.localidade||'');
+      document.getElementById('estado').value=(d.uf||'');
+    }).catch(function(){document.getElementById('cep-loading').textContent='';});
+}
+function buscarCEP2(){
+  var cep=g('cep_coleta').replace(/\D/g,'');
+  if(cep.length!==8)return;
+  document.getElementById('cep-loading2').textContent='🔄';
+  fetch('https://viacep.com.br/ws/'+cep+'/json/')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      document.getElementById('cep-loading2').textContent='';
+      if(d.erro)return;
+      document.getElementById('end_coleta').value=(d.logradouro||'');
+      document.getElementById('bairro_coleta').value=(d.bairro||'');
+      document.getElementById('cidade_coleta').value=(d.localidade||'/'+(d.uf||''));
+    }).catch(function(){document.getElementById('cep-loading2').textContent='';});
+}
+
+// Termos com scroll
+function chkScroll(n){
+  var el=document.getElementById('scroll'+n);
+  if(el.scrollTop+el.clientHeight>=el.scrollHeight-10){
+    document.getElementById('chk'+n).disabled=false;
+    document.getElementById('aviso'+n).textContent='✓ Você chegou ao final';
+    document.getElementById('aviso'+n).style.color='var(--verde)';
+  }
+}
+
+// Validar CPF
+function valCPF(cpf){var c=cpf.replace(/\D/g,'');if(c.length!==11||/^(\d)\1{10}$/.test(c))return false;var s=0;for(var i=0;i<9;i++)s+=parseInt(c[i])*(10-i);var r=s%11,d1=r<2?0:11-r;if(parseInt(c[9])!==d1)return false;s=0;for(var i=0;i<10;i++)s+=parseInt(c[i])*(11-i);r=s%11;return parseInt(c[10])===(r<2?0:11-r);}
+
+// Upload
+function carregarArq(inp,tipo){
+  var f=inp.files[0];if(!f)return;
+  var rd=new FileReader();
+  rd.onload=function(e){
+    if(tipo==='doc'){
+      aDoc={name:f.name,data:e.target.result};
+      document.getElementById('ok-doc').textContent='✓ '+f.name;
+      document.getElementById('prev-doc').src=e.target.result;
+      document.getElementById('prev-doc').style.display='block';
+    }else{
+      aRes={name:f.name,data:e.target.result};
+      document.getElementById('ok-res').textContent='✓ '+f.name;
+      document.getElementById('prev-res').src=e.target.result;
+      document.getElementById('prev-res').style.display='block';
+    }
+  };
+  rd.readAsDataURL(f);
+}
+
+// Assinatura
+var canvas,ctx,draw=false;
+window.addEventListener('load',function(){
+  canvas=document.getElementById('canvas-sig');if(!canvas)return;
+  canvas.width=canvas.offsetWidth||300;ctx=canvas.getContext('2d');
+  ctx.strokeStyle='#1a1f2e';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.lineJoin='round';
+  function gX(e){return(e.clientX-canvas.getBoundingClientRect().left)*(canvas.width/canvas.getBoundingClientRect().width);}
+  function gY(e){return(e.clientY-canvas.getBoundingClientRect().top)*(canvas.height/canvas.getBoundingClientRect().height);}
+  canvas.addEventListener('mousedown',function(e){draw=true;ctx.beginPath();ctx.moveTo(gX(e),gY(e));});
+  canvas.addEventListener('mousemove',function(e){if(!draw)return;ctx.lineTo(gX(e),gY(e));ctx.stroke();hasSig=true;stSig();});
+  canvas.addEventListener('mouseup',function(){draw=false;sigData=canvas.toDataURL();});
+  canvas.addEventListener('touchstart',function(e){e.preventDefault();draw=true;var t=e.touches[0];ctx.beginPath();ctx.moveTo(gX(t),gY(t));},{passive:false});
+  canvas.addEventListener('touchmove',function(e){e.preventDefault();if(!draw)return;var t=e.touches[0];ctx.lineTo(gX(t),gY(t));ctx.stroke();hasSig=true;stSig();},{passive:false});
+  canvas.addEventListener('touchend',function(){draw=false;sigData=canvas.toDataURL();});
+});
+function stSig(){var el=document.getElementById('sig-st');el.textContent='Assinatura registrada ✓';el.style.color='var(--verde)';}
+function limSig(){ctx.clearRect(0,0,canvas.width,canvas.height);hasSig=false;sigData='';var el=document.getElementById('sig-st');el.textContent='Assine com o dedo ou mouse acima';el.style.color='';}
+
+function finalizar(){
+  if(!hasSig){alert('Por favor assine antes de continuar.');return;}
+  if(!g('local')){alert('Informe o local.');return;}
+  var btn=document.getElementById('btn-fin');btn.disabled=true;btn.textContent='Enviando...';
+  var d={
+    nome:g('nome'),cpf:g('cpf'),rg:g('rg'),orgao:g('orgao'),
+    data_nascimento:g('nascimento'),estado_civil:g('estado_civil'),
+    sexo:g('sexo'),profissao:g('profissao'),nacionalidade:g('nacionalidade'),
+    celular:g('celular'),telefone:g('telefone'),email:g('email'),
+    endereco:g('endereco'),bairro:g('bairro'),cep:g('cep'),
+    cidade:g('cidade'),estado:g('estado'),
+    end_coleta:g('end_coleta'),bairro_coleta:g('bairro_coleta'),
+    cep_coleta:g('cep_coleta'),cidade_coleta:g('cidade_coleta'),referencia:g('referencia'),
+    favorecido:g('favorecido'),banco:g('banco'),agencia:g('agencia'),
+    conta:g('conta'),tipo_conta:g('tipo_conta'),pix:g('pix'),
+    local_assinatura:g('local'),data_assinatura:new Date().toLocaleDateString('pt-BR'),
+    assinatura:sigData||null,
+    doc_foto:!!aDoc.data,doc_residencia:!!aRes.data,
+    doc_foto_nome:aDoc.name||null,doc_residencia_nome:aRes.name||null,
+    excluido:false
+  };
+  var to=setTimeout(function(){btn.disabled=false;btn.textContent='Finalizar ✓';cur=7;ui();},12000);
+  fetch(SURL+'/rest/v1/cadastros',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SKEY,'Authorization':'Bearer '+SKEY,'Prefer':'return=minimal'},
+    body:JSON.stringify(d)
+  }).then(function(r){clearTimeout(to);btn.disabled=false;btn.textContent='Finalizar ✓';cur=7;ui();
+  }).catch(function(){clearTimeout(to);btn.disabled=false;btn.textContent='Finalizar ✓';cur=7;ui();});
+}
+
+function baixarPDF(){
+  var w=window.open('','_blank');
+  var dt=new Date().toLocaleString('pt-BR');
+  var nm=g('nome');var cpf=g('cpf');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Cadastro Cooper</title><style>body{font-family:Arial,sans-serif;max-width:700px;margin:0 auto;padding:24px;font-size:12px;color:#1a1f2e}h1{color:#1a6b3a;font-size:17px;margin-bottom:2px}.sub{color:#6b7280;font-size:11px;margin-bottom:18px}h2{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;border-bottom:1px solid #e2e5ea;padding-bottom:4px;margin:14px 0 8px}.g{display:grid;grid-template-columns:1fr 1fr;gap:8px}.f .l{font-size:10px;color:#6b7280}.f .v{font-weight:600;font-size:12px}.full{grid-column:1/-1}img.sig{max-width:200px;border:1px solid #e2e5ea;border-radius:4px}img.doc{max-width:280px;max-height:200px;border:1px solid #e2e5ea;border-radius:4px;margin-top:4px}@media print{body{padding:8px}}</style></head><body>');
+  w.document.write('<h1>Cooper Indaiatuba — Ficha de Associação</h1><p class="sub">Emitido em: '+dt+'</p>');
+  w.document.write('<h2>Dados Pessoais</h2><div class="g">');
+  w.document.write('<div class="f full"><div class="l">Nome</div><div class="v">'+nm+'</div></div>');
+  w.document.write('<div class="f"><div class="l">CPF</div><div class="v">'+cpf+'</div></div>');
+  w.document.write('<div class="f"><div class="l">RG</div><div class="v">'+g('rg')+(g('orgao')?' / '+g('orgao'):'')+'</div></div>');
+  w.document.write('<div class="f"><div class="l">Nascimento</div><div class="v">'+g('nascimento')+'</div></div>');
+  w.document.write('<div class="f"><div class="l">Estado Civil</div><div class="v">'+g('estado_civil')+'</div></div>');
+  w.document.write('<div class="f"><div class="l">Profissão</div><div class="v">'+g('profissao')+'</div></div>');
+  w.document.write('</div><h2>Contato</h2><div class="g">');
+  w.document.write('<div class="f"><div class="l">Celular</div><div class="v">'+g('celular')+'</div></div>');
+  w.document.write('<div class="f"><div class="l">E-mail</div><div class="v">'+g('email')+'</div></div>');
+  w.document.write('<div class="f full"><div class="l">Endereço</div><div class="v">'+g('endereco')+', '+g('bairro')+' — '+g('cidade')+'/'+g('estado')+' CEP: '+g('cep')+'</div></div>');
+  w.document.write('</div>');
+  if(g('end_coleta')){
+    w.document.write('<h2>Endereço de Coleta</h2><div class="g">');
+    w.document.write('<div class="f full"><div class="l">Endereço</div><div class="v">'+g('end_coleta')+', '+g('bairro_coleta')+' — '+g('cidade_coleta')+'</div></div>');
+    if(g('referencia'))w.document.write('<div class="f full"><div class="l">Referência</div><div class="v">'+g('referencia')+'</div></div>');
+    w.document.write('</div>');
+  }
+  if(aDoc.data||aRes.data){
+    w.document.write('<h2>Documentos</h2>');
+    if(aDoc.data)w.document.write('<div class="f"><div class="l">Documento com foto</div><img src="'+aDoc.data+'" class="doc"></div><br>');
+    if(aRes.data)w.document.write('<div class="f"><div class="l">Comprovante de residência</div><img src="'+aRes.data+'" class="doc"></div><br>');
+  }
+  w.document.write('<h2>Assinatura</h2>');
+  if(sigData)w.document.write('<img src="'+sigData+'" class="sig"><br>');
+  w.document.write('<p style="font-size:10px;color:#6b7280;margin-top:4px">'+nm+' — CPF: '+cpf+'</p>');
+  w.document.write('<p style="font-size:11px;margin-top:6px">Local: '+g('local')+' | Data: '+new Date().toLocaleDateString('pt-BR')+'</p>');
+  w.document.write('<scr'+'ipt>window.onload=function(){window.print();}<\/scr'+'ipt></body></html>');
+  w.document.close();
+}
+
+function enviarWA(){
+  var t='*Cadastro Cooper Indaiatuba*\n\n*Nome:* '+g('nome')+'\n*CPF:* '+g('cpf')+'\n*Celular:* '+g('celular')+'\n*E-mail:* '+g('email')+'\n*Endereço:* '+g('endereco')+', '+g('bairro')+' — '+g('cidade');
+  window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');
+}
+
+ui();
+</script>
+</body>
+</html>
